@@ -176,9 +176,16 @@ class Agent:
         MIN_WAIT         = 0.08  # pausa mínima entre intentos de detección
 
         self._last_play_time = time.time()
+        start_time = time.time()
         last_acted_piece = None
 
         while True:
+            now = time.time()
+            if now - start_time >= 125:
+                print("Han pasado 2 minutos. Tomando captura de pantalla y deteniendo la ejecución.")
+                pyautogui.screenshot("screenshot.png")
+                break
+
             board      = self.env.get_board()
             piece      = self.env.detect_piece()
             next_piece = self.env.next_piece()
