@@ -1,7 +1,14 @@
 import numpy as np
 
 
-def evaluate(board, lines, piece=None):
+def get_line_bonus(lines):
+    if   lines == 4: return 12.0
+    elif lines == 3: return  5.0
+    elif lines == 2: return  2.5
+    elif lines == 1: return  0.8
+    else:            return  0.0
+
+def evaluate_structure(board, piece=None):
     heights = []
     holes = 0
 
@@ -37,12 +44,6 @@ def evaluate(board, lines, piece=None):
 
     well_depth = _best_well(heights)
 
-    if   lines == 4: line_bonus = 12.0
-    elif lines == 3: line_bonus =  5.0
-    elif lines == 2: line_bonus =  2.5
-    elif lines == 1: line_bonus =  0.8
-    else:            line_bonus =  0.0
-
     well_bonus = 0.0
     if piece == "I":
         well_bonus = 0.5 * well_depth
@@ -51,14 +52,16 @@ def evaluate(board, lines, piece=None):
 
     return (
         -0.51  * agg_height
-        + line_bonus
-        - 3.5  * holes
+        - 3.56 * holes
         - 0.18 * bumpiness
         - 0.35 * max_height
         - 0.10 * row_transitions
         - 0.08 * col_transitions
         + well_bonus
     )
+
+def evaluate(board, lines, piece=None):
+    return get_line_bonus(lines) + evaluate_structure(board, piece)
 
 
 def _best_well(heights):

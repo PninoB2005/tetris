@@ -2,8 +2,7 @@ import numpy as np
 import pyautogui
 import time
 from pieces import PIECES
-from heuristics import evaluate
-
+from heuristics import evaluate, get_line_bonus
 
 class Agent:
 
@@ -113,21 +112,16 @@ class Agent:
 
                 new, lines = self.clear(self.place(board, p, row, col))
 
+                # Usamos la ecuación de Bellman correcta: recompensa inmediata + valor futuro
+                # El valor futuro (lookahead) ya evalúa el tablero resultante.
                 score = (
-                    evaluate(new, lines, piece_type)
+                    get_line_bonus(lines)
                     + 0.9 * self.lookahead(new, next_type)
                 )
 
                 max_height = max(self._get_heights(new))
                 if max_height > 15:
                     score -= (max_height - 15) * 15
-
-                holes = self.count_deep_holes(new)
-                score -= holes * 8
-
-                heights = self._get_heights(new)
-                variance = np.var(heights)
-                score -= variance * 1.5
 
                 if piece_type == "I" and self._well_col is not None:
                     if col == self._well_col:
