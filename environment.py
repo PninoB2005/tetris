@@ -85,11 +85,7 @@ class Environment:
         return board
 
     def detect_piece(self):
-        """
-        Busca la pieza en las primeras 4 filas (zona de spawn).
-        Si no detecta nada devuelve la última pieza conocida como fallback
-        para que el agente siempre tenga algo con qué decidir.
-        """
+
         x, y, w, h = self.board_region
         full = self.screenshot()
 

@@ -4,11 +4,14 @@ import time
 from pieces import PIECES
 from heuristics import evaluate, get_line_bonus
 
+# Desactivar o reducir la pausa por defecto de pyautogui (0.1s originalmente)
+pyautogui.PAUSE = 0.01
+
 class Agent:
 
     def __init__(self, env):
         self.env = env
-        self._well_col = None
+        self._well_col = 9  # Fija el hueco a la extrema derecha
         self._last_played = None   # (piece, rot, col) de la ultima jugada
         self._last_play_time = 0.0
 
@@ -72,19 +75,6 @@ class Agent:
                     holes += 1
         return holes
 
-    def _detect_well_column(self, board):
-        heights = self._get_heights(board)
-        best_col = 9
-        best_depth = 0
-        for i in range(10):
-            left  = heights[i - 1] if i > 0 else 20
-            right = heights[i + 1] if i < 9 else 20
-            depth = min(left, right) - heights[i]
-            if depth > best_depth:
-                best_depth = depth
-                best_col = i
-        self._well_col = best_col if best_depth >= 2 else None
-
     def lookahead(self, board, next_piece):
         best = -999999
         for piece in PIECES[next_piece]:
@@ -99,7 +89,6 @@ class Agent:
         return best
 
     def best_move(self, board, piece_type, next_type):
-        self._detect_well_column(board)
         best = None
 
         for rot, p in enumerate(PIECES[piece_type]):
@@ -123,11 +112,11 @@ class Agent:
                 if max_height > 15:
                     score -= (max_height - 15) * 15
 
-                if piece_type == "I" and self._well_col is not None:
+                if piece_type == "I":
                     if col == self._well_col:
-                        score += 3.0
+                        score += 5.0
                     else:
-                        score -= 1.0
+                        score -= 2.0
 
                 if best is None or score > best[0]:
                     best = (score, rot, col)
@@ -147,18 +136,18 @@ class Agent:
         """
         for _ in range(rotation):
             pyautogui.press("x")
-            time.sleep(0.05)
+            time.sleep(0.02)
 
         for _ in range(12):
             pyautogui.press("left")
-            time.sleep(0.03)
+            time.sleep(0.015)
 
         for _ in range(col):
             pyautogui.press("right")
-            time.sleep(0.03)
+            time.sleep(0.015)
 
         pyautogui.press("space")
-        time.sleep(0.4)
+        time.sleep(0.15)
 
     def run(self):
         """
